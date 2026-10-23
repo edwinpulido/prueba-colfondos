@@ -1,0 +1,26 @@
+# Build
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Logs y temporales
+*.log
+logs/
+tmp/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Variables de ambiente locales
+.env
+.env.local
