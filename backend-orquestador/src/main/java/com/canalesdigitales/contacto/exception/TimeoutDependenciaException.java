@@ -6,7 +6,7 @@ public class TimeoutDependenciaException extends ErrorNegocio {
 
     public TimeoutDependenciaException(String dependencia, String codigo) {
         super(codigo,
-                "La validacion con " + dependencia + " esta tardando mas de lo esperado. Intente nuevamente.",
+                "La operacion con " + dependencia + " esta tardando mas de lo esperado. Intente nuevamente.",
                 HttpStatus.GATEWAY_TIMEOUT);
     }
 }
