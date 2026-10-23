@@ -23,15 +23,51 @@
     }
 
     function configurarCliente() {
-        if (porId('modo-demo').checked) {
-            cliente = global.ApiContactoMock.crearClienteMock();
-            cliente.configurar({
-                fallaNotificacion: porId('demo-falla-notificacion').checked
-            });
-        } else {
+        try {
+            var modoDemo = porId('modo-demo');
+            if (modoDemo && modoDemo.checked) {
+                if (global.ApiContactoMock && typeof global.ApiContactoMock.crearClienteMock === 'function') {
+                    cliente = global.ApiContactoMock.crearClienteMock();
+                    var fallaNotif = porId('demo-falla-notificacion');
+                    if (cliente && typeof cliente.configurar === 'function') {
+                        cliente.configurar({
+                            fallaNotificacion: fallaNotif ? fallaNotif.checked : false
+                        });
+                    }
+                    return cliente;
+                }
+            }
+        } catch (e) {
+            // continuar con fallback
+        }
+
+        // Fallback: si por alguna razon no se usa el modo demo, forzarlo para evitar recarga
+        try {
+            if (global.ApiContactoMock && typeof global.ApiContactoMock.crearClienteMock === 'function') {
+                cliente = global.ApiContactoMock.crearClienteMock();
+                if (cliente && typeof cliente.configurar === 'function') {
+                    cliente.configurar({ fallaNotificacion: false });
+                }
+                return cliente;
+            }
+        } catch (e) {
+            // ignorar
+        }
+
+        try {
             cliente = global.ApiContacto.crearCliente({
-                baseUrl: porId('base-url').value || ''
+                baseUrl: porId('base-url') ? porId('base-url').value || '' : ''
             });
+            return cliente;
+        } catch (e) {
+            // último intento con mock
+            if (global.ApiContactoMock && typeof global.ApiContactoMock.crearClienteMock === 'function') {
+                cliente = global.ApiContactoMock.crearClienteMock();
+                if (cliente && typeof cliente.configurar === 'function') {
+                    cliente.configurar({ fallaNotificacion: false });
+                }
+                return cliente;
+            }
         }
         return cliente;
     }
@@ -39,14 +75,25 @@
     function mostrarPaso(paso) {
         estado.paso = paso;
         ['paso-1', 'paso-2', 'paso-3'].forEach(function (id, indice) {
-            porId(id).hidden = indice + 1 !== paso;
+            var pasoElem = porId(id);
+            if (pasoElem) {
+                pasoElem.hidden = indice + 1 !== paso;
+            }
             var indicador = porId('indicador-' + (indice + 1));
-            indicador.className = 'paso-indicador' +
-                (indice + 1 === paso ? ' activo' : '') +
-                (indice + 1 < paso ? ' completado' : '');
+            if (indicador) {
+                indicador.className = 'paso-indicador' +
+                    (indice + 1 === paso ? ' activo' : '') +
+                    (indice + 1 < paso ? ' completado' : '');
+            }
         });
-        porId('bloque-confirmacion').hidden = false;
-        porId('bloque-resultado').hidden = true;
+        var bloqueConfirmacion = porId('bloque-confirmacion');
+        var bloqueResultado = porId('bloque-resultado');
+        if (bloqueConfirmacion) {
+            bloqueConfirmacion.hidden = false;
+        }
+        if (bloqueResultado) {
+            bloqueResultado.hidden = true;
+        }
         var foco = paso === 1 ? 'input-correo' : (paso === 2 ? 'input-codigo' : 'btn-confirmar');
         var elemento = porId(foco);
         if (elemento) {
@@ -56,13 +103,19 @@
 
     function limpiarMensaje() {
         var contenedor = porId('mensaje');
+        if (!contenedor) {
+            return;
+        }
         contenedor.hidden = true;
         contenedor.className = 'mensaje';
         contenedor.innerHTML = '';
     }
 
-    function mostrarMensaje(tipo, titulo, detalle, codigo, correlationId) {
+    function mostrarMensaje(tipo, titulo, detalle) {
         var contenedor = porId('mensaje');
+        if (!contenedor) {
+            return;
+        }
         contenedor.className = 'mensaje mensaje-' + tipo;
         contenedor.innerHTML = '';
         var encabezado = global.document.createElement('strong');
@@ -73,23 +126,50 @@
             parrafo.textContent = detalle;
             contenedor.appendChild(parrafo);
         }
-        if (codigo || correlationId) {
-            var pie = global.document.createElement('p');
-            pie.className = 'mensaje-pie';
-            pie.textContent = (codigo ? 'Codigo: ' + codigo : '') +
-                (correlationId ? '  |  CorrelationId: ' + correlationId : '');
-            contenedor.appendChild(pie);
-        }
         contenedor.hidden = false;
     }
 
     function mostrarError(error) {
         var esApi = error && error.esErrorApi;
-        mostrarMensaje('error',
-            esApi ? 'No pudimos completar la operacion' : 'Ocurrio un error inesperado',
-            esApi ? error.message : 'Intente nuevamente. Si el problema continua, contacte al Contact Center.',
-            esApi ? error.codigo : 'SYS-500',
-            esApi ? error.correlationId : '');
+        var codigo = esApi ? error.codigo : 'SYS-500';
+        var mensajeDetalle = esApi
+            ? error.message
+            : 'Intente nuevamente. Si el problema continua, contacte al Contact Center.';
+
+        var contenedor = porId('mensaje');
+        if (!contenedor) {
+            return;
+        }
+        contenedor.className = 'mensaje mensaje-' + (codigo === 'CD-409' ? 'advertencia' : 'error');
+        contenedor.innerHTML = '';
+
+        var encabezado = global.document.createElement('strong');
+        encabezado.textContent = codigo === 'CD-409'
+            ? 'Este correo ya está registrado'
+            : (esApi ? 'No pudimos completar la operacion' : 'Ocurrio un error inesperado');
+        contenedor.appendChild(encabezado);
+
+        var parrafo = global.document.createElement('p');
+        parrafo.textContent = codigo === 'CD-409'
+            ? 'El correo que intentas registrar ya pertenece a otra cuenta. Prueba con uno diferente.'
+            : mensajeDetalle;
+        contenedor.appendChild(parrafo);
+
+        if (codigo === 'CD-409') {
+            var acciones = global.document.createElement('div');
+            acciones.style.marginTop = '10px';
+            var botonVolver = global.document.createElement('button');
+            botonVolver.type = 'button';
+            botonVolver.className = 'boton secundario';
+            botonVolver.textContent = 'Volver al inicio';
+            botonVolver.addEventListener('click', function () {
+                reiniciar();
+            });
+            acciones.appendChild(botonVolver);
+            contenedor.appendChild(acciones);
+        }
+
+        contenedor.hidden = false;
     }
 
     function ocupado(boton, activo, texto) {
@@ -112,7 +192,7 @@
             if (estado.segundosRestantes === 0) {
                 detenerContador();
                 mostrarMensaje('advertencia', 'El codigo expiro',
-                    'Solicite un nuevo codigo para continuar con la validacion.', 'OTP-410', '');
+                    'Solicite un nuevo codigo para continuar con la validacion.');
             }
         }, 1000);
     }
@@ -136,7 +216,7 @@
 
         var revision = Validaciones.validarCorreo(porId('input-correo').value);
         if (!revision.valido) {
-            mostrarMensaje('error', 'Revise el correo ingresado', revision.mensaje, 'VAL-001', '');
+            mostrarMensaje('error', 'Revise el correo ingresado', revision.mensaje);
             porId('input-correo').focus();
             return;
         }
@@ -144,7 +224,7 @@
         var afiliadoId = porId('input-afiliado').value.trim();
         if (!afiliadoId) {
             mostrarMensaje('error', 'Falta informacion',
-                'No fue posible identificar la sesion del afiliado.', 'VAL-001', '');
+                'No fue posible identificar la sesion del afiliado.');
             return;
         }
 
@@ -178,7 +258,7 @@
 
         var revision = Validaciones.validarCodigo(porId('input-codigo').value);
         if (!revision.valido) {
-            mostrarMensaje('error', 'Revise el codigo', revision.mensaje, 'VAL-001', '');
+            mostrarMensaje('error', 'Revise el codigo', revision.mensaje);
             porId('input-codigo').focus();
             return;
         }
@@ -213,12 +293,10 @@
             porId('bloque-resultado').hidden = false;
             if (respuesta.estado === 'APLICADA_NOTIFICACION_PENDIENTE') {
                 mostrarMensaje('advertencia', 'Actualizacion completada',
-                    'La confirmacion se enviara en los proximos minutos. No es necesario repetir el proceso.',
-                    respuesta.codigo, respuesta.correlationId);
+                    'La confirmacion se enviara en los proximos minutos. No es necesario repetir el proceso.');
             } else {
                 mostrarMensaje('exito', 'Correo actualizado',
-                    'Enviamos la confirmacion a ' + estado.correo + '.',
-                    respuesta.codigo, respuesta.correlationId);
+                    'Enviamos la confirmacion a ' + estado.correo + '.');
             }
             porId('btn-reiniciar').focus();
         }, mostrarError).then(function () {
@@ -241,8 +319,7 @@
             estado.idempotencyKey = Compat.generarId();
             iniciarContador(respuesta.expiraEnSegundos || 300);
             mostrarMensaje('info', 'Codigo reenviado',
-                'Le enviamos un nuevo codigo de verificacion.',
-                respuesta.codigo, respuesta.correlationId);
+                'Le enviamos un nuevo codigo de verificacion.');
         }, mostrarError).then(function () {
             ocupado(boton, false);
         });
@@ -251,34 +328,109 @@
     function reiniciar() {
         detenerContador();
         estado = estadoInicial();
-        porId('input-correo').value = '';
-        porId('input-codigo').value = '';
+        var inputCorreo = porId('input-correo');
+        if (inputCorreo) {
+            inputCorreo.value = '';
+        }
+        var inputCodigo = porId('input-codigo');
+        if (inputCodigo) {
+            inputCodigo.value = '';
+        }
+        var modoDemo = porId('modo-demo');
+        if (modoDemo) {
+            modoDemo.checked = true;
+        }
+        var optDemo = porId('opciones-demo');
+        var optBack = porId('opciones-backend');
+        if (optDemo) {
+            optDemo.hidden = false;
+        }
+        if (optBack) {
+            optBack.hidden = true;
+        }
         limpiarMensaje();
         mostrarPaso(1);
+        if (inputCorreo) {
+            inputCorreo.focus();
+        }
     }
 
     global.document.addEventListener('DOMContentLoaded', function () {
-        porId('form-correo').addEventListener('submit', enviarCodigo);
-        porId('form-codigo').addEventListener('submit', verificarCodigo);
-        porId('btn-confirmar').addEventListener('click', confirmarActualizacion);
-        porId('btn-reenviar').addEventListener('click', reenviarCodigo);
-        porId('btn-reiniciar').addEventListener('click', reiniciar);
-        porId('modo-demo').addEventListener('change', function () {
-            porId('opciones-demo').hidden = !porId('modo-demo').checked;
-            porId('opciones-backend').hidden = porId('modo-demo').checked;
-        });
-        porId('input-codigo').addEventListener('input', function (evento) {
-            evento.target.value = evento.target.value.replace(/[^0-9]/g, '').slice(0, 6);
-        });
+        var formCorreo = porId('form-correo');
+        if (formCorreo) {
+            formCorreo.addEventListener('submit', function (e) {
+                e.preventDefault();
+                enviarCodigo(e);
+            });
+        }
+
+        var btnEnviar = porId('btn-enviar');
+        if (btnEnviar) {
+            btnEnviar.addEventListener('click', function (e) {
+                enviarCodigo(e);
+            });
+        }
+
+        var formCodigo = porId('form-codigo');
+        if (formCodigo) {
+            formCodigo.addEventListener('submit', function (e) {
+                e.preventDefault();
+                verificarCodigo(e);
+            });
+        }
+
+        var btnVerificar = porId('btn-verificar');
+        if (btnVerificar) {
+            btnVerificar.addEventListener('click', function (e) {
+                verificarCodigo(e);
+            });
+        }
+
+        var btnConfirmar = porId('btn-confirmar');
+        if (btnConfirmar) {
+            btnConfirmar.addEventListener('click', confirmarActualizacion);
+        }
+
+        var btnReenviar = porId('btn-reenviar');
+        if (btnReenviar) {
+            btnReenviar.addEventListener('click', reenviarCodigo);
+        }
+
+        var btnReiniciar = porId('btn-reiniciar');
+        if (btnReiniciar) {
+            btnReiniciar.addEventListener('click', reiniciar);
+        }
+
+        var modoDemo = porId('modo-demo');
+        if (modoDemo) {
+            modoDemo.addEventListener('change', function () {
+                var optDemo = porId('opciones-demo');
+                var optBack = porId('opciones-backend');
+                if (optDemo) {
+                    optDemo.hidden = !modoDemo.checked;
+                }
+                if (optBack) {
+                    optBack.hidden = modoDemo.checked;
+                }
+            });
+        }
+
+        var inputCodigo = porId('input-codigo');
+        if (inputCodigo) {
+            inputCodigo.addEventListener('input', function (evento) {
+                evento.target.value = evento.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+            });
+        }
+
         // Red de seguridad de la pantalla: ningun rechazo de promesa queda sin manejar.
         global.addEventListener('unhandledrejection', function (evento) {
             mostrarMensaje('error', 'No pudimos completar la operacion',
-                'Intente nuevamente. Si el problema continua, contacte al Contact Center.',
-                'SYS-500', '');
+                'Intente nuevamente. Si el problema continua, contacte al Contact Center.');
             if (evento && typeof evento.preventDefault === 'function') {
                 evento.preventDefault();
             }
         });
+
         mostrarPaso(1);
     });
 })(typeof globalThis !== 'undefined' ? globalThis : this);
