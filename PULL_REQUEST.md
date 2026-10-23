@@ -66,7 +66,7 @@ Cobertura funcional del cambio:
 
 ## Evidencia
 
-- Resultado de `mvn test` y del runner de Node adjuntos en la HU.
+- Salida de las pruebas en `docs/05_Matriz_Pruebas.md`.
 - Log con `correlationId` de una transaccion de prueba.
 - Capturas de la pantalla en los tres pasos y en el estado de notificacion pendiente.
 
@@ -90,7 +90,7 @@ Ninguna obligatoria nueva para el portal. El backend usa `IDENTITY_BASE_URL`,
 - [x] Sin credenciales ni datos reales en el repositorio
 - [x] Logs sin datos sensibles
 - [x] `README` y `.env.example` actualizados
-- [x] Analisis estatico sin hallazgos bloqueantes
+- [ ] Analisis estatico sin hallazgos bloqueantes (pendiente de ejecucion en el pipeline)
 - [ ] Escaneo de codigo seguro (se radica con el comite de cambios)
 - [ ] Prueba de regresion en Safari 17 (laboratorio QA)
-- [x] Revisión de par solicitada
+- [ ] Revision de par
