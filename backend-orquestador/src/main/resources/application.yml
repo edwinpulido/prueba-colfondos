@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT:8081}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: contacto-orquestador
+  jackson:
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: never
+
+contacto:
+  otp:
+    longitud: 6
+    vigencia-segundos: 300
+    max-intentos: 3
+  integracion:
+    identity:
+      base-url: ${IDENTITY_BASE_URL:http://localhost:9091}
+      path-inicio: /v1/identity/verificacion
+      path-validacion: /v1/identity/verificacion/validacion
+      connect-timeout-ms: 2000
+      read-timeout-ms: 60000
+    customer-data:
+      base-url: ${CUSTOMER_DATA_BASE_URL:http://localhost:9092}
+      path-contacto: /v1/afiliados/%s/contacto
+      connect-timeout-ms: 2000
+      read-timeout-ms: 8000
+    messaging:
+      base-url: ${MESSAGING_BASE_URL:http://localhost:9093}
+      path-notificacion: /v1/notificaciones
+      connect-timeout-ms: 2000
+      read-timeout-ms: 5000

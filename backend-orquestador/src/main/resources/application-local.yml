@@ -1,0 +1,12 @@
+logging:
+  level:
+    com.canalesdigitales.contacto: DEBUG
+
+contacto:
+  integracion:
+    identity:
+      base-url: http://localhost:9091
+    customer-data:
+      base-url: http://localhost:9092
+    messaging:
+      base-url: http://localhost:9093
