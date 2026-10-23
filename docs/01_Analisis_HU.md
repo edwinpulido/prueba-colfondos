@@ -7,7 +7,7 @@ Ultima actualizacion: octubre de 2026
 
 ## 1. Entendimiento de la necesidad
 
-Los documentos 01 y 10 del Mini-RAG describen que el afiliado no logra terminar procesos
+Los documentos 01 y 14 del Mini-RAG describen que el afiliado no logra terminar procesos
 digitales porque el correo o el celular registrados no sirven para recibir el codigo de
 verificacion. Hoy la salida es el Contact Center o la oficina fisica.
 

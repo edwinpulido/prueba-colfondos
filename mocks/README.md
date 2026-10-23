@@ -25,7 +25,7 @@ docker run --rm -p 9093:8080 -v "%cd%/mocks/messaging:/home/wiremock/mappings" w
 | Codigo expirado | Enviar `999999` en la validacion |
 | Correo duplicado | Afiliado `AFI-000999` al confirmar |
 | Messaging caido | Detener el contenedor de Messaging antes de confirmar |
-| Identity lento | Detener el contenedor de Identity: el orquestador responde `SYS-503` |
+| Identity detenido | El orquestador responde `504 IDV-408` (timeout de conexion) |
 
 En la prueba local tambien se puede usar la API simulada del frontend, que no requiere
 Docker.

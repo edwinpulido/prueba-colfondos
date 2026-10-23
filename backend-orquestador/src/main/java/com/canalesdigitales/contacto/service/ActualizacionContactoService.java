@@ -14,6 +14,7 @@ import com.canalesdigitales.contacto.exception.CodigoExpiradoException;
 import com.canalesdigitales.contacto.exception.CodigoInvalidoException;
 import com.canalesdigitales.contacto.exception.ErrorNegocio;
 import com.canalesdigitales.contacto.exception.EstadoInvalidoException;
+import com.canalesdigitales.contacto.exception.IdentidadRechazadaException;
 import com.canalesdigitales.contacto.exception.IntentosExcedidosException;
 import com.canalesdigitales.contacto.exception.TransaccionNoEncontradaException;
 import org.slf4j.Logger;
@@ -74,7 +75,13 @@ public class ActualizacionContactoService {
             respuesta.setExpiraEnSegundos(inicio.getExpiraEnSegundos());
             return respuesta;
         } catch (ErrorNegocio error) {
-            marcarFallida(transaccion, error);
+            if (error instanceof IdentidadRechazadaException) {
+                transaccion.cambiarEstado(EstadoActualizacion.RECHAZADA);
+                transaccion.setResultado(error.getCodigo(), error.getMessage());
+                repositorio.guardar(transaccion);
+            } else {
+                marcarFallida(transaccion, error);
+            }
             throw error;
         }
     }
