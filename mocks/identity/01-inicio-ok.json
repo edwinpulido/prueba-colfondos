@@ -1,0 +1,12 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/identity/verificacion"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"referencia\":\"REF-000123\",\"canal\":\"SMS\",\"expiraEnSegundos\":300}"
+  }
+}

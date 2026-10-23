@@ -1,0 +1,12 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/v1/afiliados/AFI-000123/contacto"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"resultado\":\"ACTUALIZADO\"}"
+  }
+}

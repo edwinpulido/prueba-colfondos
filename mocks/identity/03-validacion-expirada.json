@@ -1,0 +1,15 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/identity/verificacion/validacion",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$[?(@.codigo == '999999')]" }
+    ]
+  },
+  "response": {
+    "status": 410,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"codigo\":\"OTP-EXPIRADO\",\"mensaje\":\"El codigo expiro\"}"
+  }
+}

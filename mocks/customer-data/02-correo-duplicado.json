@@ -1,0 +1,12 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/v1/afiliados/AFI-000999/contacto"
+  },
+  "response": {
+    "status": 409,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"codigo\":\"CD-409\",\"mensaje\":\"El correo ya esta registrado\"}"
+  }
+}

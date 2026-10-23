@@ -1,0 +1,12 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/identity/verificacion/validacion"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"aprobado\":true,\"codigo\":\"IDV-200\",\"mensaje\":\"Identidad validada\"}"
+  }
+}
