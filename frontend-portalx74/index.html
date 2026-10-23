@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Actualizacion de datos de contacto</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="encabezado">
+    <div class="contenedor">
+        <p class="marca">Canales Digitales</p>
+        <h1>Actualiza tu correo electronico</h1>
+        <p class="subtitulo">Recibe tus certificados y comunicaciones en la direccion que usas hoy.</p>
+    </div>
+</header>
+
+<main class="contenedor principal">
+    <section class="tarjeta" aria-describedby="ayuda-flujo">
+        <ol class="pasos" aria-label="Progreso del flujo">
+            <li id="indicador-1" class="paso-indicador activo"><span>1</span> Validar identidad</li>
+            <li id="indicador-2" class="paso-indicador"><span>2</span> Codigo de seguridad</li>
+            <li id="indicador-3" class="paso-indicador"><span>3</span> Confirmar</li>
+        </ol>
+
+        <div id="mensaje" class="mensaje" role="alert" aria-live="assertive" hidden></div>
+
+        <form id="paso-1" novalidate>
+            <p class="ayuda" id="ayuda-flujo">
+                Por seguridad, primero validamos tu identidad con un codigo de un solo uso.
+            </p>
+            <div class="campo">
+                <label for="input-afiliado">Numero de afiliado</label>
+                <input id="input-afiliado" name="afiliadoId" type="text" value="AFI-000123"
+                       autocomplete="off" inputmode="text" required>
+                <p class="campo-ayuda">Dato de ejemplo para la demostracion.</p>
+            </div>
+            <div class="campo">
+                <label for="input-correo">Nuevo correo electronico</label>
+                <input id="input-correo" name="nuevoCorreo" type="email" inputmode="email"
+                       autocomplete="email" placeholder="nombre@dominio.com" required>
+                <p class="campo-error" id="error-correo" hidden></p>
+            </div>
+            <button id="btn-enviar" type="submit" class="boton">Enviar codigo de verificacion</button>
+        </form>
+
+        <form id="paso-2" novalidate hidden>
+            <p class="ayuda">
+                Enviamos un codigo de 6 digitos a tu <span id="canal-envio">mensaje de texto</span>
+                registrado. El correo a actualizar es <strong id="correo-destino"></strong>.
+            </p>
+            <div class="campo">
+                <label for="input-codigo">Codigo de verificacion</label>
+                <input id="input-codigo" name="codigo" type="text" inputmode="numeric"
+                       autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required>
+                <p class="campo-ayuda">El codigo vence en <strong id="contador">05:00</strong></p>
+            </div>
+            <div class="acciones">
+                <button id="btn-verificar" type="submit" class="boton">Validar codigo</button>
+                <button id="btn-reenviar" type="button" class="boton secundario">Reenviar codigo</button>
+            </div>
+        </form>
+
+        <section id="paso-3" hidden>
+            <div id="bloque-confirmacion">
+                <p class="ayuda">
+                    Tu identidad fue validada. Confirma que el nuevo correo es
+                    <strong id="correo-confirmacion"></strong>. Este cambio reemplaza el correo actual
+                    para todas las comunicaciones.
+                </p>
+                <button id="btn-confirmar" type="button" class="boton">Confirmar actualizacion</button>
+            </div>
+            <div id="bloque-resultado" class="resultado" hidden>
+                <h2>Resumen de la actualizacion</h2>
+                <dl>
+                    <dt>Correo actualizado</dt>
+                    <dd id="resumen-correo"></dd>
+                    <dt>Estado</dt>
+                    <dd id="resumen-estado"></dd>
+                    <dt>Fecha</dt>
+                    <dd id="resumen-fecha"></dd>
+                </dl>
+                <button id="btn-reiniciar" type="button" class="boton secundario">Realizar otra actualizacion</button>
+            </div>
+        </section>
+    </section>
+
+    <aside class="panel">
+        <h2>Panel de prueba local</h2>
+        <label class="interruptor">
+            <input type="checkbox" id="modo-demo" checked>
+            Usar API simulada (sin backend)
+        </label>
+
+        <div id="opciones-demo">
+            <label class="interruptor">
+                <input type="checkbox" id="demo-falla-notificacion">
+                Simular falla del servicio de notificaciones
+            </label>
+            <ul class="notas">
+                <li>Codigo valido: <code>123456</code></li>
+                <li>Codigo expirado: <code>999999</code></li>
+                <li>Correo duplicado: <code>duplicado@dominio.com</code></li>
+                <li>Correo invalido: <code>ana@</code></li>
+            </ul>
+        </div>
+
+        <div id="opciones-backend" hidden>
+            <div class="campo">
+                <label for="base-url">URL del orquestador</label>
+                <input id="base-url" type="text" value="http://localhost:8081" autocomplete="off">
+                <p class="campo-ayuda">Requiere el backend en ejecucion y CORS habilitado para el origen del portal.</p>
+            </div>
+        </div>
+
+        <p class="notas-pie">
+            Los datos usados son sinteticos. No se almacenan imagenes ni datos biometricos.
+        </p>
+    </aside>
+</main>
+
+<footer class="pie contenedor">
+    <p>Componente de actualizacion de contacto - PortalX 7.4</p>
+</footer>
+
+<script src="src/compat.js"></script>
+<script src="src/validaciones.js"></script>
+<script src="src/api.js"></script>
+<script src="src/mock-api.js"></script>
+<script src="src/componente.js"></script>
+</body>
+</html>
